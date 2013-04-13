@@ -1,8 +1,8 @@
 Game = {
   // This defines our grid's size and the size of each of its tiles
   map_grid: {
-    width:  24,
-    height: 16,
+    width:  64,
+    height: 36,
     tile: {
       width:  16,
       height: 16
@@ -41,5 +41,6 @@ Game = {
         }
       }
     }
+    Crafty.e('Robot').at(18, 10).moveChance(0.8);
   }
 }
