@@ -36,8 +36,9 @@ Crafty.c('Block', {
 
   // Our slide component - listens for slide events
   // and smoothly slides to another tile location
-  Crafty.c("Slide", {
+  Crafty.c("Slider", {
     init: function() {
+      this.requires('Collision');
       this._stepFrames = 5;
       this._tileSize = 16;
       this._moving = false;
@@ -46,6 +47,7 @@ Crafty.c('Block', {
       this._frames = 0;
 
       this.bind("Slide", function(direction) {
+        this._lastDirection = direction;
         // Don't continue to slide if we're already moving
         if(this._moving) return false;
         this._moving = true;
@@ -56,8 +58,8 @@ Crafty.c('Block', {
         this._sourceY = this.y;
 
         // Figure out our destination
-        this._destX = this.x + direction[0] * 32;
-        this._destY = this.y + direction[1] * 32;
+        this._destX = this.x + direction[0] * this._tileSize;
+        this._destY = this.y + direction[1] * this._tileSize;
 
         // Get our x and y velocity
         this._vx = direction[0] * this._tileSize / this._stepFrames;
@@ -65,7 +67,10 @@ Crafty.c('Block', {
 
         this._frames = this._stepFrames;
       }).bind("EnterFrame",function(e) {
-        if(!this._moving) return false;
+        if(!this._moving){
+
+          return false;
+        } 
 
         // If we'removing, update our position by our per-frame velocity
         this.x += this._vx;
@@ -80,12 +85,21 @@ Crafty.c('Block', {
           this.y = this._destY;
         }
         this.trigger('Moved', {x: this.x, y: this.y});
+        
       });
-
+      this.stopOnSolids();
     }, 
     slideFrames: function(frames) { 
        this._stepFrames = frames;
     },
+
+    // Registers a stop-movement function to be called when
+  //  this entity hits an entity with the "Solid" component
+  stopOnSolids: function() {
+    this.onHit('Solid', this.cancelSlide);
+ 
+    return this;
+  },
 
     // A function we'll use later to 
     // cancel our movement and send us back to where we started
@@ -99,49 +113,120 @@ Crafty.c('Block', {
 // a mover is an entity that moves
 Crafty.c("Mover",{
   _directions:  [[0,-1], [0,1], [1,0], [-1,0]],
-  init: function() {
+   init: function() {
+    this._lastDirection = this._directions[0];
     this._moveChance = 0.5;
-    this.requires('Actor, Slide');
+    this.requires('Actor, Slider');
 
-    this.bind("Tick",function() {
+    this.bind("EnterFrame",function() {
       if(Math.random() < this._moveChance) {
         this.trigger("Slide", this._randomDirection());
       }
     });
-    this.checkMove();
+    
   },
 
 
-  checkMove: function() {
-    var that = this;
-     setInterval(function(){that.trigger('Tick')},1000)
-
-  },
-
+  
   moveChance: function(val) {
     this._moveChance = val;
 
   },
   _randomDirection: function() {
-    return this._directions[Math.floor(Math.random()*4)];
+
+    var index = Math.random()*50;
+   
+
+    if (index >= 4){
+    direction = this._lastDirection;
+    }else{
+      
+      direction = this._directions[Math.floor(index)];
+    }
+
+   
+    this._lastDirection = direction;
+    return direction;
   }
 
 });
 
 Crafty.c('Robot', {
   init: function() {
-    this.requires('Actor, Color, Collision, Mover');
-    this.color('rgb(200, 50, 50)')
-    .stopOnSolids();
+    this.type ="";
+    this.age = 0;
+    this.numKids = 0;
+    this.genes = {
+      virility : Math.floor(Math.random() *3),
+      lifeSpan : Math.floor(Math.random() *80),
+      strength : Math.floor(Math.random() *20)
+    };
+    this.breedtTme = 5000;
+    this.hitEligable = true;
+    this.requires('Actor, Mover');
+    this.onHit('Robot', this.hitRobot);
+    this.bind('EnterFrame', function(){
+      this.age+=0.01;
+        if (this.age > this.genes.lifeSpan){
+        this.die();
+      }
+    })
   },
 
+  setGenes : function (genes){
+    this.genes = genes;
+  },
 
-  // Registers a stop-movement function to be called when
-  //  this entity hits an entity with the "Solid" component
-  stopOnSolids: function() {
-    this.onHit('Solid', this.stopMovement);
+  hitRobot:function(data){
+  robot = data[0].obj
+   if(robot.type != this.type){
+    if (this.strength > robot.strength )
+    {
+      this.genes.strength+=2;
+      robot.die();
+    }else {
+      this.die();
+    }
+     
+   }else{
+     if (this.hitEligable && this.age>5 && this.age<12 && this.numKids<this.genes.virility)
+     {
+      Crafty.trigger('NewRob', {type: this.type, x:this.x, y:this.y, genes:this.genes});
+      this.hitEligable = false;
+      var that = this;
+      this.timeID = setInterval(function() {that.hitEligable = true; clearInterval(that.timeID);}, this.breedtTme);
+    
+    }
+   }
  
-    return this;
+},
+
+  die :function(){
+    this.destroy();
   },
+});
+
+  Crafty.c('RobotA', {
+   init: function() {
+   
+    this.requires('Robot, Color');
+     this.type = "A";
+    this.color('rgb(200, 50, 50)')
+  
+  
+  },
+
+
+
+});
+   Crafty.c('RobotB', {
+   init: function() {
+    this.requires('Robot, Color');
+     this.type="B";
+    this.color('rgb(50, 200, 50)')
+  
+  },
+
+  
 });
 
