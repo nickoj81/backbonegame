@@ -180,25 +180,32 @@ Crafty.c('Robot', {
   hitRobot:function(data){
   robot = data[0].obj
    if(robot.type != this.type){
-    if (this.strength > robot.strength )
-    {
-      this.genes.strength+=2;
-      robot.die();
-    }else {
-      this.die();
-    }
+    this.fight(robot);
      
    }else{
-     if (this.hitEligable && this.age>5 && this.age<12 && this.numKids<this.genes.virility)
-     {
-      Crafty.trigger('NewRob', {type: this.type, x:this.x, y:this.y, genes:this.genes});
-      this.hitEligable = false;
-      var that = this;
-      this.timeID = setInterval(function() {that.hitEligable = true; clearInterval(that.timeID);}, this.breedtTme);
-    
+     this.breed();
     }
-   }
- 
+  },
+
+
+breed : function(){
+  if (this.hitEligable && this.age>5 && this.age<12 && this.numKids<this.genes.virility) {
+    Crafty.trigger('NewRob', {type: this.type, x:this.x, y:this.y, genes:this.genes});
+    this.hitEligable = false;
+    var that = this;
+    this.timeID = setInterval(function() {that.hitEligable = true; clearInterval(that.timeID);}, this.breedtTme);
+  }
+},
+
+
+fight : function( robot) {
+  if (this.strength > robot.strength) {
+    this.genes.strength+=2;
+    robot.die();
+   }else {
+      this.die();
+    }
+  
 },
 
   die :function(){
