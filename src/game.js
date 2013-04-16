@@ -25,7 +25,11 @@ Game = {
   	
   	var robType = 'Robot' + params.type;
   	console.log(robType + "hits made"+ params);
-  	Crafty.e(robType).at(params.x/16, params.y/16).moveChance(0.7);
+  	var entity = Crafty.e('RobotA').at(params.x/16, params.y/16);
+  		console.log(entity + "create");
+
+  		entity.moveChance(0.7);
+  		entity.setGenes(params.genes);
   },
 
   // Initialize and start our game

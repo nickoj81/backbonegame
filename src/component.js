@@ -153,17 +153,22 @@ Crafty.c("Mover",{
 
 Crafty.c('Robot', {
   init: function() {
+    this.requires('Actor, Mover, Color');
     this.type ="";
     this.age = 0;
     this.numKids = 0;
+    this.experience = 0;
     this.genes = {
+      color : {red: 50, green: 50, blue: 50},
       virility : Math.floor(Math.random() *3),
       lifeSpan : Math.floor(Math.random() *80),
       strength : Math.floor(Math.random() *20)
     };
     this.breedtTme = 5000;
     this.hitEligable = true;
-    this.requires('Actor, Mover');
+   
+   
+    this.color('rgb(50,50,50)');
     this.onHit('Robot', this.hitRobot);
     this.bind('EnterFrame', function(){
       this.age+=0.01;
@@ -173,34 +178,50 @@ Crafty.c('Robot', {
     })
   },
 
-  setGenes : function (genes){
-    this.genes = genes;
+checkJ : function () {
+
+
+},
+
+setGenes: function (genes) {
+  this.genes = genes;
+  this.setColor( this.genes.color.red , this.genes.color.green, this.genes.color.blue);
+},
+
+  setColor : function (r, g, b) {
+    this.genes.color.red = r;
+    this.genes.color.green = g;
+    this.genes.color.blue = b;
+//
+    this.color('rgb(' + this.genes.color.red + ',' + this.genes.color.green + ','+ this.genes.color.blue + ')' );
+
   },
 
+  
   hitRobot:function(data){
   robot = data[0].obj
    if(robot.type != this.type){
     this.fight(robot);
      
    }else{
-     this.breed();
-    }
-  },
-
-
-breed : function(){
-  if (this.hitEligable && this.age>5 && this.age<12 && this.numKids<this.genes.virility) {
+     if (this.hitEligable && this.age>5 && this.age<12 && this.numKids<this.genes.virility) {
+  
     Crafty.trigger('NewRob', {type: this.type, x:this.x, y:this.y, genes:this.genes});
     this.hitEligable = false;
     var that = this;
     this.timeID = setInterval(function() {that.hitEligable = true; clearInterval(that.timeID);}, this.breedtTme);
   }
-},
+    }
+  },
 
 
 fight : function( robot) {
-  if (this.strength > robot.strength) {
-    this.genes.strength+=2;
+
+var thisPower = this.genes.strength + this.experience + Math.random()*10;
+var robotPower = robot.genes.strength + robot.experience + Math.random()*10;
+
+  if (thisPower > robotPower) {
+    this.experience+=2;
     robot.die();
    }else {
       this.die();
@@ -215,25 +236,23 @@ fight : function( robot) {
 
   Crafty.c('RobotA', {
    init: function() {
-   
-    this.requires('Robot, Color');
+    
+    this.requires('Robot');
      this.type = "A";
-    this.color('rgb(200, 50, 50)')
+     this.setColor(50, 100 + Math.floor(Math.random()*100), 20 + Math.floor(Math.random()*20));
+ },
+
   
-  
-  },
-
-
-
 });
    Crafty.c('RobotB', {
    init: function() {
-    this.requires('Robot, Color');
-     this.type="B";
-    this.color('rgb(50, 200, 50)')
-  
+    this.requires('Robot');
+    this.type="B";
+    this.setColor(100 + Math.floor(Math.random()*100), 50, 20 +Math.floor(Math.random()*20));
+      
   },
 
+   
   
 });
 
