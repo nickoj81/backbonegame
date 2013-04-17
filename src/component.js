@@ -115,7 +115,6 @@ Crafty.c("Mover",{
   _directions:  [[0,-1], [0,1], [1,0], [-1,0]],
    init: function() {
     this._lastDirection = this._directions[0];
-    this._moveChance = 0.5;
     this.requires('Actor, Slider');
 
     this.bind("EnterFrame",function() {
@@ -162,14 +161,16 @@ Crafty.c('Robot', {
       color : {red: 50, green: 50, blue: 50},
       virility : Math.floor(Math.random() *3),
       lifeSpan : Math.floor(Math.random() *80),
-      strength : Math.floor(Math.random() *20)
+      strength : Math.floor(Math.random() *20),
+      moveChance : Math.floor(Math.random()*9)/10
     };
     this.breedtTme = 5000;
     this.hitEligable = true;
-   
+  
    
     this.color('rgb(50,50,50)');
     this.onHit('Robot', this.hitRobot);
+     this.setGenes(this.genes);
     this.bind('EnterFrame', function(){
       this.age+=0.01;
         if (this.age > this.genes.lifeSpan){
@@ -178,14 +179,12 @@ Crafty.c('Robot', {
     })
   },
 
-checkJ : function () {
 
-
-},
 
 setGenes: function (genes) {
   this.genes = genes;
   this.setColor( this.genes.color.red , this.genes.color.green, this.genes.color.blue);
+  this.moveChance(genes.moveChance);
 },
 
   setColor : function (r, g, b) {

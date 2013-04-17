@@ -27,8 +27,6 @@ Game = {
   	console.log(robType + "hits made"+ params);
   	var entity = Crafty.e('RobotA').at(params.x/16, params.y/16);
   		console.log(entity + "create");
-
-  		entity.moveChance(0.7);
   		entity.setGenes(params.genes);
   },
 
@@ -53,11 +51,11 @@ Game = {
           // Place a bush entity at the current tile
          Crafty.e('Block').at(x, y);
          }else if (ranVal>0.06 &&ranVal <0.08){
-         	 Crafty.e('RobotA').at(x+1, y+1).moveChance(0.7);
+         	 Crafty.e('RobotA').at(x+1, y+1);
          }else if (ranVal>0.08 && ranVal<0.1)
          {
 
-         	 Crafty.e('RobotB').at(x+1, y+1).moveChance(0.7);
+         	 Crafty.e('RobotB').at(x+1, y+1);
               }
          
         
