@@ -66,11 +66,11 @@ createInfoPanel: function() {
 
          if (  x >  (Game.map_grid.width/2) +5 &&  Game.max_entitiesA >0)
             {
-                Crafty.e('RobotA').at(x, y);
+                Crafty.e('RobotA').at(x+10, y);
                 Game.max_entitiesA --;
             }else if (  x < (Game.map_grid.width/2) -5 && Game.max_entitiesB >0) {
 
-                   Crafty.e('RobotB').at(x, y);
+                   Crafty.e('RobotB').at(x+10, y);
                   Game.max_entitiesB--;
             }
            Game.current_entities++;

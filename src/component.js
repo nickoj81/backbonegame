@@ -177,7 +177,7 @@ Crafty.c('Robot', {
     };
     this.breedtTme = 5000;
     this.hitEligable = true;
-    this.bind('MouseDown', function(){Crafty.trigger("EntitySelected", this);})
+    this.bind('MouseOver', function(){Crafty.trigger("EntitySelected", this);})
    this.alpha = 0.4;
     this.color('rgb(50,50,50)');
     this.onHit('Robot', this.hitRobot);
@@ -218,7 +218,7 @@ setGenes: function (genes) {
     this.fight(robot);
      
    }else{
-     if (this.hitEligable && this.age>5 && this.age<12 && this.numKids<this.genes.virility) {
+     if (this.hitEligable && this.age>2 && this.age<this.genes.lifeSpan && this.numKids<this.genes.virility) {
   
     Crafty.trigger('NewRob', {type: this.type, x:this.x, y:this.y, genes:this.genes});
     this.hitEligable = false;
