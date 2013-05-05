@@ -27,9 +27,20 @@ Crafty.c('Actor', {
   },
 });
 
+
+Crafty.c('Tiled', {
+  init: function() {
+    this.requires('Actor, Color');
+     this.color('rgb(50, 150, 50)');
+  },
+});
+
+
+
+
 Crafty.c('Block', {
   init: function() {
-    this.requires('Actor, Solid, Color');
+    this.requires('Tiled, Solid');
     this.color('rgb(50, 50, 50)');
   },
   });
@@ -133,7 +144,7 @@ Crafty.c("Mover",{
   },
   _randomDirection: function() {
 
-    var index = Math.random()*50;
+    var index = Math.random()*40;
    
 
     if (index >= 4){
@@ -152,27 +163,31 @@ Crafty.c("Mover",{
 
 Crafty.c('Robot', {
   init: function() {
-    this.requires('Actor, Mover, Color');
+    this.requires('Actor, Mover, Color, Mouse');
     this.type ="";
     this.age = 0;
     this.numKids = 0;
     this.experience = 0;
     this.genes = {
-      color : {red: 50, green: 50, blue: 50},
-      virility : Math.floor(Math.random() *3),
+      color : {red: 200, green: 200, blue: 200},
+      virility : 2 + Math.floor(Math.random() *3),
       lifeSpan : Math.floor(Math.random() *80),
       strength : Math.floor(Math.random() *20),
       moveChance : Math.floor(Math.random()*9)/10
     };
     this.breedtTme = 5000;
     this.hitEligable = true;
-  
-   
+    this.bind('MouseDown', function(){Crafty.trigger("EntitySelected", this);})
+   this.alpha = 0.4;
     this.color('rgb(50,50,50)');
     this.onHit('Robot', this.hitRobot);
      this.setGenes(this.genes);
     this.bind('EnterFrame', function(){
       this.age+=0.01;
+      this.alpha +=0.001;
+
+
+
         if (this.age > this.genes.lifeSpan){
         this.die();
       }
@@ -216,11 +231,13 @@ setGenes: function (genes) {
 
 fight : function( robot) {
 
-var thisPower = this.genes.strength + this.experience + Math.random()*10;
-var robotPower = robot.genes.strength + robot.experience + Math.random()*10;
+var thisPower = this.genes.strength + (this.age/10) + this.experience + Math.random()*10;
+var robotPower = robot.genes.strength +(this.age/10) + robot.experience + Math.random()*10;
 
   if (thisPower > robotPower) {
     this.experience+=2;
+    this.w = this.w + Game.map_grid.tile.width/5  ; //(this._w/2);
+    this.h = this.h + Game.map_grid.tile.height/5  ; //(this._h/2);
     robot.die();
    }else {
       this.die();
@@ -228,29 +245,48 @@ var robotPower = robot.genes.strength + robot.experience + Math.random()*10;
   
 },
 
-  die :function(){
+  die :function() {
+   // $(.an)
     this.destroy();
+    Game.current_entities--;
   },
 });
 
   Crafty.c('RobotA', {
    init: function() {
-    
-    this.requires('Robot');
+     this.requires('Robot');
      this.type = "A";
-     this.setColor(50, 100 + Math.floor(Math.random()*100), 20 + Math.floor(Math.random()*20));
+     this.setColor(0, 0, 100 + Math.floor(Math.random()*200));
  },
-
-  
 });
    Crafty.c('RobotB', {
    init: function() {
     this.requires('Robot');
     this.type="B";
-    this.setColor(100 + Math.floor(Math.random()*100), 50, 20 +Math.floor(Math.random()*20));
-      
+    this.setColor(100 + Math.floor(Math.random()*200), 0, 0 );
+  },
+});
+
+   Crafty.c('InfoPanel', {
+   init: function() {
+    this.requires('DOM, 2D, Text');
+    this.text("here is the text")
+    this.textColor('#FFFFFF');
+    this.bind('EntitySelected', this.handleEntitySelected )
   },
 
+
+handleEntitySelected : function(data) {
+  var selectedRob = data;
+
+var strength = '<br/>Stength: ' + selectedRob.genes.strength
+var age = '<br/>Age: ' + Math.floor(selectedRob.age) + "/" + Math.floor(selectedRob.genes.lifeSpan);
+var moveChance = "<br/>MoveChance: " + selectedRob.genes.moveChance;
+var virility = "<br/>virility: " + selectedRob.genes.virility;
+var experience = "<br/>experience: " + selectedRob.experience;
+ this.text(strength + "  " + age + " " + moveChance + virility + experience);
+
+},
    
   
 });
